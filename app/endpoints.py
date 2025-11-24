@@ -1,6 +1,4 @@
 from fastapi import APIRouter
-import base64
-import json
 
 from app.core.encryption_strategies import Base64EncryptionStrategy
 
@@ -10,3 +8,8 @@ router = APIRouter()
 def encrypt(payload: dict = None):
     strategy = Base64EncryptionStrategy()
     return strategy.encrypt_json_payload(payload)
+
+@router.post("/decrypt")
+def decrypt(payload: dict = None):
+    strategy = Base64EncryptionStrategy()
+    return strategy.decrypt_json_payload(payload)
