@@ -1,6 +1,5 @@
 import base64
 import json
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -9,8 +8,7 @@ client = TestClient(app)
 
 
 def toBase64(s):
-    if isinstance(s, str):
-        s = s.encode("utf-8")
+    s = json.dumps(s).encode("utf-8")
     return base64.b64encode(s).decode("utf-8")
 
 
@@ -45,7 +43,7 @@ def test_encryption_2_attributes():
     assert response.status_code == 200
     encrypted_data = response.json()
     assert encrypted_data.get("name") == toBase64("John Doe")
-    assert encrypted_data.get("age") == toBase64("30")
+    assert encrypted_data.get("age") == toBase64(30)
 
 
 def test_encryption_null_value():
@@ -53,7 +51,7 @@ def test_encryption_null_value():
     response = client.post("/encrypt", json=payload)
     assert response.status_code == 200
     encrypted_data = response.json().get("name")
-    assert encrypted_data == toBase64("null")
+    assert encrypted_data == toBase64(None)
 
 
 def test_encryption_boolean_value():
@@ -61,7 +59,7 @@ def test_encryption_boolean_value():
     response = client.post("/encrypt", json=payload)
     assert response.status_code == 200
     encrypted_data = response.json().get("alive")
-    assert encrypted_data == toBase64("true")
+    assert encrypted_data == toBase64(True)
 
 
 def test_encryption_list_value():
@@ -69,7 +67,7 @@ def test_encryption_list_value():
     response = client.post("/encrypt", json=payload)
     assert response.status_code == 200
     encrypted_data = response.json().get("numbers")
-    expected = toBase64(json.dumps(payload["numbers"]))
+    expected = toBase64(payload["numbers"])
     assert encrypted_data == expected
 
 
@@ -83,7 +81,7 @@ def test_encryption_only_first_depth():
     response = client.post("/encrypt", json=payload)
     assert response.status_code == 200
     encrypted_data = response.json().get("contact")
-    expected = toBase64(json.dumps(payload["contact"]))
+    expected = toBase64(payload["contact"])
     assert encrypted_data == expected
 
 
