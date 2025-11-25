@@ -20,12 +20,17 @@ class HMACSigningStrategy(SigningStrategy):
     def sign_json_payload(self, payload: dict = None) -> SignatureResponse:
         if payload is None:
             payload = {}
-        # Make serialization NOT dependent on attribute order by sorting them
         sorted_payload = self.unify_payload(payload)
-        payload_bytes = json.dumps(sorted_payload).encode('utf-8')
-        signature = hmac.new(
+        payload_bytes = self.serialize_payload(sorted_payload)
+        payload_signature = self.generate_signature(payload_bytes)
+        return SignatureResponse(signature=payload_signature)
+    
+    def serialize_payload(self, payload: dict) -> bytes:
+        return json.dumps(payload).encode('utf-8')
+    
+    def generate_signature(self, payload_bytes: bytes) -> str:
+        return hmac.new(
             key=SIGNING_KEY,
             msg=payload_bytes,
             digestmod=hashlib.sha256
         ).hexdigest()
-        return SignatureResponse(signature=signature)
