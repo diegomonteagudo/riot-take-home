@@ -12,6 +12,10 @@ class SigningStrategy(ABC):
     def sign_json_payload(self, payload: dict) -> SignatureResponse:
         pass
 
+    @abstractmethod
+    def is_signature_valid(self, payload: dict, signature: str) -> bool:
+        pass
+
     def unify_payload(self, payload: dict) -> dict:
         return sort_dict(payload)
 
@@ -24,6 +28,12 @@ class HMACSigningStrategy(SigningStrategy):
         payload_bytes = self.serialize_payload(sorted_payload)
         payload_signature = self.generate_signature(payload_bytes)
         return SignatureResponse(signature=payload_signature)
+    
+    def is_signature_valid(self, payload: dict, signature: str) -> bool:
+        sorted_payload = self.unify_payload(payload)
+        payload_bytes = self.serialize_payload(sorted_payload)
+        expected_signature = self.generate_signature(payload_bytes)
+        return hmac.compare_digest(expected_signature, signature)
     
     def serialize_payload(self, payload: dict) -> bytes:
         return json.dumps(payload).encode('utf-8')
