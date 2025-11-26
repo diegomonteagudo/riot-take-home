@@ -89,7 +89,7 @@ riot-take-home/
 │   └── core/                # Core logic and abstractions
 │         ├── encryption_strategies.py  # Strategy pattern for encryption
 │         ├── signing_strategies.py     # Strategy pattern for signing
-│         └── utils.py                  # Python bytecode cache
+│         └── utils.py                  # Utility functions
 └── tests/                   # Integration tests
 ```
 
