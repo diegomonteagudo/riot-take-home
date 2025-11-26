@@ -20,8 +20,7 @@ def generate_hmac_signature(payload: dict) -> str:
 
 def test_sign_no_payload():
     response = client.post("/sign")
-    assert response.status_code == 200
-    assert response.json() == {"signature": generate_hmac_signature({})}
+    assert response.status_code == 422
 
 
 def test_sign_empty_payload():

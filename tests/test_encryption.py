@@ -14,8 +14,7 @@ def toBase64(s):
 
 def test_encryption_no_payload():
     response = client.post("/encrypt")
-    assert response.status_code == 200
-    assert response.json() == {}
+    assert response.status_code == 422
 
 
 def test_encryption_empty_payload():

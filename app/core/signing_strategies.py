@@ -20,9 +20,7 @@ class SigningStrategy(ABC):
 
 
 class HMACSigningStrategy(SigningStrategy):
-    def sign_json_payload(self, payload: dict = None) -> SignatureResponse:
-        if payload is None:
-            payload = {}
+    def sign_json_payload(self, payload: dict) -> SignatureResponse:
         sorted_payload = self.unify_payload(payload)
         payload_bytes = self.serialize_payload(sorted_payload)
         payload_signature = self.generate_signature(payload_bytes)

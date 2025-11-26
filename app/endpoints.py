@@ -9,15 +9,15 @@ encryption_strategy = Base64EncryptionStrategy()
 signing_strategy = HMACSigningStrategy()
 
 @router.post("/encrypt")
-def encrypt(payload: dict = None) -> dict:
+def encrypt(payload: dict) -> dict:
     return encryption_strategy.encrypt_json_payload(payload)
 
 @router.post("/decrypt")
-def decrypt(payload: dict = None) -> dict:
+def decrypt(payload: dict) -> dict:
     return encryption_strategy.decrypt_json_payload(payload)
 
 @router.post("/sign", response_model=SignatureResponse)
-def sign(payload: dict = None) -> SignatureResponse:
+def sign(payload: dict) -> SignatureResponse:
     return signing_strategy.sign_json_payload(payload)
 
 @router.post("/verify", status_code=204) # No Content when valid signature

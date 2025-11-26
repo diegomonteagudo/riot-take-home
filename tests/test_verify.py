@@ -28,7 +28,6 @@ def format_payload(signature: str, data: dict) -> dict:
 def test_verify_no_payload():
     response = client.post("/verify")
     assert response.status_code == 422
-    # Verification requires both payload and signature
 
 
 def test_verify_empty_payload():
