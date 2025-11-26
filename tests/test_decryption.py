@@ -14,8 +14,7 @@ def toBase64(s):
 
 def test_decryption_no_payload():
     response = client.post("/decrypt")
-    assert response.status_code == 200
-    assert response.json() == {}
+    assert response.status_code == 422
 
 
 def test_decryption_empty_payload():
@@ -72,28 +71,19 @@ def test_decryption_list_value():
 
 def test_encryption_only_first_depth():
     payload = {
-        "contact": toBase64({
-            "email": "john@example.com",
-            "phone": "123-456-7890"
-        })
+        "contact": toBase64({"email": "john@example.com", "phone": "123-456-7890"})
     }
     response = client.post("/decrypt", json=payload)
     assert response.status_code == 200
     decrypted_data = response.json().get("contact")
-    assert decrypted_data == {
-        "email": "john@example.com",
-        "phone": "123-456-7890"
-    }
+    assert decrypted_data == {"email": "john@example.com", "phone": "123-456-7890"}
 
 
 def test_decryption_maintains_order():
     payload = {
         "name": toBase64("John Doe"),
         "age": toBase64(30),
-        "contact": toBase64({
-            "email": "john@example.com",
-            "phone": "123-456-7890"
-        })
+        "contact": toBase64({"email": "john@example.com", "phone": "123-456-7890"}),
     }
     response = client.post("/decrypt", json=payload)
     assert response.status_code == 200
@@ -114,11 +104,7 @@ def test_encryption_then_decryption_1_attribute():
 
 
 def test_encryption_then_decryption_multiple_attributes():
-    original_payload = {
-        "name": "John Doe", 
-        "age": 30, 
-        "alive": True
-    }
+    original_payload = {"name": "John Doe", "age": 30, "alive": True}
     encrypt_response = client.post("/encrypt", json=original_payload)
     assert encrypt_response.status_code == 200
     encrypted_data = encrypt_response.json()
@@ -152,10 +138,7 @@ def test_encryption_then_decryption_list():
 
 def test_encryption_then_decryption_nested():
     original_payload = {
-        "contact": {
-            "email": "john@example.com",
-            "phone": "123-456-7890"
-        }
+        "contact": {"email": "john@example.com", "phone": "123-456-7890"}
     }
     encrypt_response = client.post("/encrypt", json=original_payload)
     assert encrypt_response.status_code == 200
@@ -167,13 +150,7 @@ def test_encryption_then_decryption_nested():
 
 
 def test_encryption_then_decryption_nested_3_levels():
-    original_payload = {
-        "level1": {
-            "level2": {
-                "level3": "deep value"
-            }
-        }
-    }
+    original_payload = {"level1": {"level2": {"level3": "deep value"}}}
     encrypt_response = client.post("/encrypt", json=original_payload)
     assert encrypt_response.status_code == 200
     encrypted_data = encrypt_response.json()
@@ -181,6 +158,7 @@ def test_encryption_then_decryption_nested_3_levels():
     assert decrypt_response.status_code == 200
     decrypted_data = decrypt_response.json()
     assert decrypted_data == original_payload
+
 
 def test_already_unecrypted_value():
     payload = {"name": "John Doe"}
@@ -194,11 +172,8 @@ def test_mixed_encrypted_and_unecrypted_values():
     payload = {
         "name": toBase64("John Doe"),
         "age": toBase64(30),
-        "contact": toBase64({
-            "email": "john@example.com",
-            "phone": "123-456-7890"
-        }),
-        "birth_date": "1998-11-19"
+        "contact": toBase64({"email": "john@example.com", "phone": "123-456-7890"}),
+        "birth_date": "1998-11-19",
     }
     response = client.post("/decrypt", json=payload)
     assert response.status_code == 200
@@ -207,7 +182,6 @@ def test_mixed_encrypted_and_unecrypted_values():
     assert decrypted_data.get("age") == 30
     assert decrypted_data.get("contact") == {
         "email": "john@example.com",
-        "phone": "123-456-7890"
+        "phone": "123-456-7890",
     }
     assert decrypted_data.get("birth_date") == "1998-11-19"
-

@@ -1,216 +1,142 @@
 # Riot Take-Home Technical Challenge
-
 ## Overview
 
-This challenge requires you to build an HTTP API with 4 endpoints that handle JSON payloads for encryption, decryption, signing, and verification operations.
+For this take-home challenge, I built an HTTP API with 4 endpoints that handle JSON payloads for encryption, decryption, signing, and verification operations.
 
-## Requirements
+## Tech Stack
 
-### 1. Encryption Endpoint (`/encrypt`)
+- **Language**: Python
+- **Framework**: FastAPI
+- **Testing**: pytest
 
-- **Method**: POST
-- **Input**: Any JSON payload
-- **Output**: JSON payload with all properties at depth 1 encrypted
-- **Encryption Algorithm**: Base64 (for simplicity)
+## Setup Instructions
 
-**Example**:
-
-Input:
-
-```json
-{
-  "name": "John Doe",
-  "age": 30,
-  "contact": {
-    "email": "john@example.com",
-    "phone": "123-456-7890"
-  }
-}
+### Clone Repository
+```bash
+git clone https://github.com/diegomonteagudo/riot-take-home
+cd repository
 ```
 
-Output:
-
-```json
-{
-  "name": "some_encrypted_value",
-  "age": "some_encrypted_value",
-  "contact": "some_encrypted_value"
-}
+### Create Virtual Environment (optional)
+```bash
+python -m venv venv
 ```
 
-### 2. Decryption Endpoint (`/decrypt`)
+### Activate Virtual Environment (optional)
 
-- **Method**: POST
-- **Input**: Any JSON payload
-- **Output**: Original JSON payload with decrypted values. If some properties contain values which were not encrypted, they must remain unchanged. The `/decrypt` endpoint should be able to detect encrypted strings and decrypt, returning  the decrypted payload as JSON.
-- **Decryption Algorithm**: Base64 (for simplicity)
-
-**Examples**:
-
-Using the output from the `/encrypt` example as input should return the original payload:
-
-Input:
-
-```json
-{
-  "name": "some_encrypted_value",
-  "age": "some_encrypted_value",
-  "contact": "some_encrypted_value"
-}
+#### Linux/macOS
+```bash
+source venv/bin/activate
 ```
 
-Output:
-
-```json
-{
-  "name": "John Doe",
-  "age": 30,
-  "contact": {
-    "email": "john@example.com",
-    "phone": "123-456-7890"
-  }
-}
+Windows (Command Prompt)
+```cmd
+venv\Scripts\activate.bat
 ```
 
-Unencrypted properties must remain unchanged:
-
-Input:
-
-```json
-{
-  "name": "some_encrypted_value",
-  "age": "some_encrypted_value",
-  "contact": "some_encrypted_value",
-  "birth_date": "1998-11-19"
-}
+Windows (PowerShell)
+```powershell
+venv\Scripts\Activate.ps1
 ```
 
-Output:
-
-```json
-{
-  "name": "John Doe",
-  "age": 30,
-  "contact": {
-    "email": "john@example.com",
-    "phone": "123-456-7890"
-  },
-  "birth_date": "1998-11-19" // This remains unchanged
-}
+### Install Dependencies
+```bash
+pip install -r requirements.txt
 ```
 
-### 3. Signing Endpoint (`/sign`)
-
-- **Method**: POST
-- **Input**: Any JSON payload
-- **Output**: JSON payload with a unique "signature" property
-- **Signature Algorithm**: HMAC
-- **Important Note**: The signature must be computed based on the value of the JSON payload, not its string representation. This means the order of properties should not affect the signature.
-
-**Examples**:
-
-Basic example for an object with two properties:
-
-Input:
-
-```json
-{
-  "message": "Hello World",
-  "timestamp": 1616161616
-}
+### Running the Application
+```bash
+fastapi run app/main.py
 ```
 
-Output:
+The server will start on `http://localhost:8000`
 
-```json
-{
-  "signature": "a1b2c3d4e5f6g7h8i9j0..."
-}
+**Note** : There is also the OpenAPI specification available at `http://localhost:8000/docs` where you can read the documentation and run examples.
+
+### Running the tests
+```bash
+pytest
 ```
 
-The order of properties must not change the signature, which means this example will generate the same signature:
+## API Endpoints
 
-Input:
+### POST `/encrypt`
+Encrypts all properties at the first depth using Base64 encoding.
 
-```json
-{
-  "timestamp": 1616161616,
-  "message": "Hello World"
-}
+### POST `/decrypt`
+Decrypts Base64 encoded properties, leaving non-encrypted values unchanged.
+
+### POST `/sign`
+Generates an HMAC signature for the provided JSON payload (order-independent).
+
+### POST `/verify`
+Verifies a signature against provided data.
+- Returns 204 (No Content) on success
+- Returns 400 (Bad Request) on invalid signature
+
+## Project Structure
+
+```
+riot-take-home/
+├── README.me
+├── requirements.txt         # Python dependencies
+├── app/                     # Main application code
+│   ├── __init__.py
+│   ├── config.py            # Configuration (HMAC key)
+│   ├── endpoints.py         # Endpoint definitions
+│   ├── main.py              # FastAPI app entry point
+│   ├── models.py            # Pydantic models
+│   └── core/                # Core logic and abstractions
+│         ├── encryption_strategies.py  # Strategy pattern for encryption
+│         ├── signing_strategies.py     # Strategy pattern for signing
+│         └── utils.py                  # Python bytecode cache
+└── tests/                   # Integration tests
 ```
 
-Output:
 
-```json
-{
-  "signature": "a1b2c3d4e5f6g7h8i9j0..."
-}
-```
+## Design Decisions
 
-### 4. Verification Endpoint (`/verify`)
+### Framework choice
+I used FastAPI because of :
+- the gain in development speed compared to the scope of this project in particular
+- the automatic OpenAPI documentation
+- the Pydantic data models
+- the reliance of FastAPI on type hints making development both more efficient (request validation) and reliable
+- its speed compared to other Python frameworks
 
-- **Method**: POST
-- **Input**: JSON payload with "signature" and "data" properties
-- **Output**:
-  - HTTP 204 (No Content) if signature is valid
-  - HTTP 400 (Bad Request) if signature is invalid
+I also hesitated with Node.js with Express because I know Riot uses TypeScript on the front-end, but ultimately decided to go with FastAPI because of the scope of the challenge
 
-**Examples**:
+### Abstractions
+- Implemented the Strategy design pattern for easy algorithm swapping
+- For encryption/decryption, `EncryptionStrategy` is the abstract class. It is implemented with Base64 as the encryption algorithm with `Base64EncryptionStrategy`
+- For encryption/decryption, `SigningStrategy` is the abstract class. It is implemented with Base64 as the encryption algorithm with `HMACSigningStrategy`
 
-Basic example of an object with two properties:
+### Signature Algorithm
+The key for the HMAC algorithm is available in app/config.py. In a real production environment, this key would be a secure secret stored in environment variables or a secrets manager.
 
-Input:
+### Error Handling
+- It was not explicitely stated how the API should answer in case of invalid or missing JSONs
+- Error 400 is an actual intended possible output of the API in case of an invalid signature in `/verify`
+- FastAPI's automatic request validation (using Pydantic data models) use error 422 in case of an invalid request
 
-```json
-{
-  "signature": "a1b2c3d4e5f6g7h8i9j0...",
-  "data": {
-    "message": "Hello World",
-    "timestamp": 1616161616
-  }
-}
-```
+For these reasons, I decided 422 was an adequate response in case of invalid JSONs and bodies with no JSON at all.
 
-Output: 204 HTTP response
 
-The same input object with the order of properties changed must produce the same signature:
+### Detection of unencrypted data (`/decrypt`)
+To detect whether or not a specific property is encrypted, I simply try json.loads and see if it fails. However, it has come to my mind that there may exist non-Base64 strings that decode as valid Base64 into an integer or a boolean. 
 
-Input:
+Here are two ideas of how to do it differently :
+- in a stochastic manner by studying how much the succession of characters matches the profile of a Base64 encoding
+- by encoding not only the value itself but its type in a new JSON object
 
-```json
-{
-  "signature": "a1b2c3d4e5f6g7h8i9j0...",
-  "data": {
-    "timestamp": 1616161616,
-    "message": "Hello World"
-  }
-}
-```
+### Testing
 
-Output: 204 HTTP response
+The tests are available in the `tests` folder. You can run them with the `pytest` command.
 
-Example when using a tampered signature or payload:
+They were all written before the feature they test for, following a TDD methodology. They test for invalid or empty JSONs, different types, attribute order, nested objects and cycles (`/encrypt` followed by `/decrypt` and `/sign` followed by `/verify`).
 
-Input:
+**Note:** I realize my solution lacks unit tests. I decided to only go with integration tests because of the time constraint and the relatively small size of the project.
 
-```json
-{
-  "signature": "a1b2c3d4e5f6g7h8i9j0...",
-  "data": {
-    "timestamp": 1616161616,
-    "message": "Goodbye World"
-  }
-}
-```
 
-Output: 400 HTTP response
-
-## Design Considerations
-
-1. **Abstraction**: The encryption algorithm (Base64) in the `/encrypt` and `/decrypt` endpoints should be easily replaceable with another algorithm without significant changes to the codebase. Design your solution with appropriate abstractions. The same principle applies to the signature algorithm used in the `/sign` and `/verify` endpoints.
-
-2. **Consistency**: Ensure that `/encrypt` followed by `/decrypt` returns the original payload. Ensure that a payload signed with `/sign` can be successfully verified with `/verify`.
-
-## Submission
-
-Please submit your completed project by sending your GitHub repository link to the recruiter's email.
+### OpenAPI documentation
+FastAPI generated an OpenAPI documentation available at `http://localhost:8000/docs` after launching the server. It uses Swagger UI, you can manually test JSON objects.
