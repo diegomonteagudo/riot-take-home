@@ -83,14 +83,14 @@ def test_verify_valid_different_orders():
 def test_verify_valid_different_orders_nested():
     payload1 = {
         "contact": {
-            "phone": "123-456-7890",
-            "email": "john@example.com"
+            "email": "john@example.com",
+            "phone": "123-456-7890"
         }
     }
     payload2 = {
         "contact": {
-            "email": "john@example.com",
-            "phone": "123-456-7890"
+            "phone": "123-456-7890",
+            "email": "john@example.com"
         }
     }
     signature = generate_hmac_signature(payload1)
