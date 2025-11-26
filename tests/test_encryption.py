@@ -29,7 +29,7 @@ def test_encryption_not_json():
 
 
 def test_encryption_1_attribute():
-    payload = {"name":"John Doe"}
+    payload = {"name": "John Doe"}
     response = client.post("/encrypt", json=payload)
     assert response.status_code == 200
     encrypted_data = response.json().get("name")
@@ -37,7 +37,7 @@ def test_encryption_1_attribute():
 
 
 def test_encryption_2_attributes():
-    payload = {"name":"John Doe", "age":30}
+    payload = {"name": "John Doe", "age": 30}
     response = client.post("/encrypt", json=payload)
     assert response.status_code == 200
     encrypted_data = response.json()
@@ -71,12 +71,7 @@ def test_encryption_list_value():
 
 
 def test_encryption_only_first_depth():
-    payload = {
-        "contact": {
-            "email": "john@example.com",
-            "phone": "123-456-7890"
-        }
-    }
+    payload = {"contact": {"email": "john@example.com", "phone": "123-456-7890"}}
     response = client.post("/encrypt", json=payload)
     assert response.status_code == 200
     encrypted_data = response.json().get("contact")
@@ -88,10 +83,7 @@ def test_encryption_maintains_order():
     payload = {
         "name": "John Doe",
         "age": 30,
-        "contact": {
-            "email": "john@example.com",
-            "phone": "123-456-7890"
-        }
+        "contact": {"email": "john@example.com", "phone": "123-456-7890"},
     }
     response = client.post("/encrypt", json=payload)
     assert response.status_code == 200
